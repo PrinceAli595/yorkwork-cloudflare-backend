@@ -429,7 +429,8 @@ const DRIVE_IMAGE_IDS = {
   904: '1ky3DrW8taVcolovAQ3pp5vO5OmvWJIa6', // Barrier Mesh: 10 Metal Pins (same photo as 5 Metal Pins)
   1501: '1JIrkbbhQ4H1UV9xdTcQMacnAJBiCx3Yh', // Prism: GRZ4 Big Prism
   1502: '1ZZDdPm7b0WSEOEMFl0DmKBSYSLiUheUt', // Prism: Mini Prism with metal poles
-  1503: '1QSPgVS-U1nAN7wvvZpZ4kwIDd-8jQnex', // Prism: Mini Pogo (same photo as base id 15)
+  1503: '1s1rd_5I9gFPRI5TZS_nZaUoXyv_9jo83', // Prism: Mini Pogo (own photo, from eBay listing)
+  1504: '1s1rd_5I9gFPRI5TZS_nZaUoXyv_9jo83', // Prism: Mini Pogo (fresh cache key for the option photo)
   4001: '1SSRnVlebOkLuozS6ximsNz7nwjy202JM', // Flag colour: Red
   4002: '1omv7aGhOUwvpXrT2-f9QlOt3COKJ60Ao', // Flag colour: Blue
   4003: '1p2Tpm4SHqBc8AfiCyCmQ2f6kSJwZfHsB', // Flag colour: Pink
