@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yorkwork — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171a; --ink-2:#1f2328; --hazard:#f6b400; --signal:#d9480f;
+    --rust:#7a2e1d; --concrete:#eeece6; --concrete-2:#e2ded2; --line:#d8d3c5;
+    --steel:#4a5058; --white:#fdfcf9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--concrete);color:var(--ink);font-family:'Inter',sans-serif;}
+  h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.02em;margin:0;}
+  .mono{font-family:'Roboto Mono',monospace;}
+  button{cursor:pointer;font-family:'Roboto Mono',monospace;}
+
+  /* Login */
+  #login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:var(--ink);
+  }
+  .login-box{
+    background:var(--ink-2);border:1px solid #2c3136;padding:40px;width:340px;
+  }
+  .login-box h1{color:var(--white);font-size:22px;margin-bottom:6px;}
+  .login-box .sub{color:#9aa0a7;font-size:12px;font-family:'Roboto Mono',monospace;margin-bottom:24px;}
+  .login-box input{
+    width:100%;padding:12px;margin-bottom:14px;
+    background:var(--ink);border:1px solid #3a4046;color:var(--white);
+    font-family:'Roboto Mono',monospace;font-size:14px;
+  }
+  .login-box button{
+    width:100%;padding:13px;background:var(--hazard);color:var(--ink);
+    border:none;font-weight:700;font-size:13px;letter-spacing:0.03em;text-transform:uppercase;
+  }
+  .login-error{color:#ff8a65;font-size:12px;font-family:'Roboto Mono',monospace;margin-top:10px;min-height:16px;}
+
+  /* App shell */
+  #app{display:none;}
+  header{
+    background:var(--ink);color:var(--white);padding:16px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  header .logo{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:0.04em;}
+  header .logo span{color:var(--hazard);}
+  header button{background:none;border:1px solid #4a5058;color:var(--white);padding:8px 14px;font-size:11.5px;}
+  header button:hover{border-color:var(--white);}
+
+  nav.tabs{
+    display:flex;gap:0;background:var(--white);border-bottom:2px solid var(--ink);
+    padding:0 28px;
+  }
+  nav.tabs button{
+    background:none;border:none;padding:14px 18px;font-size:12px;letter-spacing:0.05em;
+    text-transform:uppercase;color:var(--steel);border-bottom:3px solid transparent;
+  }
+  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--hazard);font-weight:700;}
+
+  main{max-width:1100px;margin:0 auto;padding:32px 28px 80px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--ink);border:1px solid var(--ink);margin-bottom:30px;}
+  .stat-card{background:var(--white);padding:20px;}
+  .stat-card .n{font-family:'Oswald',sans-serif;font-size:30px;color:var(--signal);}
+  .stat-card .l{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--steel);}
+
+  .card{background:var(--white);border:1px solid var(--line);padding:24px;margin-bottom:24px;}
+  .card h3{font-size:15px;margin-bottom:16px;}
+
+  .bar-row{display:grid;grid-template-columns:140px 1fr 40px;align-items:center;gap:10px;margin-bottom:8px;font-family:'Roboto Mono',monospace;font-size:11.5px;}
+  .bar-row .label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--steel);}
+  .bar-track{background:var(--concrete-2);height:14px;position:relative;}
+  .bar-fill{background:var(--hazard);height:100%;}
+  .bar-row .count{text-align:right;font-weight:700;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;font-family:'Roboto Mono',monospace;font-size:10.5px;
+    letter-spacing:0.05em;text-transform:uppercase;color:var(--steel);
+    padding:10px 8px;border-bottom:2px solid var(--ink);
+  }
+  td{padding:12px 8px;border-bottom:1px dashed var(--line);vertical-align:top;}
+  tr.unread td{font-weight:700;}
+  .msg-preview{max-width:320px;color:var(--steel);font-size:12.5px;}
+  .row-actions button{
+    background:none;border:1px solid var(--steel);color:var(--steel);
+    padding:5px 9px;font-size:10.5px;margin-right:6px;
+  }
+  .row-actions button:hover{border-color:var(--ink);color:var(--ink);}
+  .badge{
+    font-family:'Roboto Mono',monospace;font-size:10px;padding:2px 7px;
+    background:var(--signal);color:var(--white);display:inline-block;
+  }
+  .badge.sent{background:#2e7d32;}
+  .badge.notsent{background:var(--rust);}
+
+  .email-list{list-style:none;margin:0 0 16px;padding:0;}
+  .email-list li{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 12px;background:var(--concrete);border:1px solid var(--line);margin-bottom:8px;
+    font-family:'Roboto Mono',monospace;font-size:13px;
+  }
+  .email-list button{background:none;border:none;color:var(--rust);text-decoration:underline;font-size:11px;}
+  .add-email-row{display:flex;gap:10px;}
+  .add-email-row input{
+    flex:1;padding:11px;border:1.5px solid var(--line);background:var(--concrete);font-family:'Inter',sans-serif;font-size:14px;
+  }
+  .add-email-row button{
+    background:var(--ink);color:var(--white);border:none;padding:0 18px;font-size:12px;font-weight:700;text-transform:uppercase;
+  }
+  .settings-note{font-family:'Roboto Mono',monospace;font-size:11.5px;color:var(--steel);margin-top:14px;line-height:1.6;}
+  .empty{padding:40px;text-align:center;color:var(--steel);font-family:'Roboto Mono',monospace;font-size:12px;}
+  select,.range-select{
+    font-family:'Roboto Mono',monospace;padding:8px 10px;border:1.5px solid var(--ink);background:var(--white);
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Yorkwork<br>Admin</h1>
+    <div class="sub">Enter the admin password to continue.</div>
+    <input type="password" id="login-password" placeholder="Password" autofocus>
+    <button id="login-btn">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="logo">YORKWORK <span>ADMIN</span></div>
+    <button id="logout-btn">Log Out</button>
+  </header>
+  <nav class="tabs">
+    <button data-tab="overview" class="active">Overview</button>
+    <button data-tab="contacts">Contacts <span id="unread-pill"></span></button>
+    <button data-tab="orders">Orders</button>
+    <button data-tab="settings">Forwarding Emails</button>
+  </nav>
+
+  <main>
+    <div class="panel active" id="panel-overview">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2>Traffic Overview</h2>
+        <select class="range-select" id="range-select">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+      </div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="card">
+        <h3>Visits Per Day</h3>
+        <div id="visits-chart"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="card">
+          <h3>Top Pages</h3>
+          <div id="top-pages"></div>
+        </div>
+        <div class="card">
+          <h3>Where Visitors Come From</h3>
+          <div id="top-referrers"></div>
+        </div>
+      </div>
+      <div class="card" id="campaign-card" style="display:none;">
+        <h3>Campaign Sources (UTM)</h3>
+        <div id="top-campaigns"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-contacts">
+      <h2 style="margin-bottom:18px;">Contact Submissions</h2>
+      <div class="card" style="padding:0;overflow-x:auto;">
+        <table id="contacts-table">
+          <thead>
+            <tr><th>Date</th><th>Name</th><th>Contact</th><th>Subject</th><th>Message</th><th>Email</th><th></th></tr>
+          </thead>
+          <tbody id="contacts-body"></tbody>
+        </table>
+        <div class="empty" id="contacts-empty" style="display:none;">No contact form submissions yet.</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-orders">
+      <h2 style="margin-bottom:18px;">Orders</h2>
+      <div class="stat-grid" id="orders-stat-grid" style="margin-bottom:24px;"></div>
+      <div class="card" style="padding:0;overflow-x:auto;">
+        <table id="orders-table">
+          <thead>
+            <tr><th>Date</th><th>Email</th><th>Items</th><th>Total</th><th>Reference</th></tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+        <div class="empty" id="orders-empty" style="display:none;">No orders yet.</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-settings">
+      <h2 style="margin-bottom:18px;">Forwarding Emails</h2>
+      <div class="card">
+        <p style="font-size:13.5px;color:var(--steel);margin-bottom:18px;">
+          Every contact form submission gets emailed to every address in this list, as well as being saved here in the admin dashboard either way.
+        </p>
+        <ul class="email-list" id="email-list"></ul>
+        <div class="add-email-row">
+          <input type="email" id="new-email" placeholder="add-an-address@example.com">
+          <button id="add-email-btn">Add</button>
+        </div>
+        <div class="settings-note">
+          Outgoing email itself is sent via the SMTP settings in your server's .env file — this list only controls who receives it. If no SMTP is configured yet, submissions are still saved and visible here, they just won't be emailed out.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = ''; // same origin as this admin page
+
+async function api(path, opts={}){
+  const res = await fetch(API + path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  if(res.status === 401){ showLogin(); throw new Error('Not authenticated'); }
+  if(!res.ok){
+    let msg = 'Request failed';
+    try { const j = await res.json(); msg = j.error || msg; } catch{}
+    throw new Error(msg);
+  }
+  if(res.status === 204) return null;
+  return res.json();
+}
+
+function showLogin(){
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+function showApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadOverview();
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  try{
+    const res = await fetch(API + '/api/admin/login', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password})
+    });
+    if(!res.ok){ const j = await res.json().catch(()=>({})); errEl.textContent = j.error || 'Login failed.'; return; }
+    showApp();
+  }catch(e){ errEl.textContent = 'Could not reach the server.'; }
+}
+
+document.getElementById('logout-btn').addEventListener('click', async ()=>{
+  await fetch(API + '/api/admin/logout', {method:'POST', credentials:'include'});
+  showLogin();
+});
+
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='contacts') loadContacts();
+    if(btn.dataset.tab==='orders') loadOrders();
+    if(btn.dataset.tab==='settings') loadSettings();
+  });
+});
+
+document.getElementById('range-select').addEventListener('change', loadOverview);
+
+function bar(rows, max){
+  if(rows.length===0) return '<div class="empty">No data yet.</div>';
+  return rows.map(r=>`
+    <div class="bar-row">
+      <div class="label" title="${r.key}">${r.key}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(4,(r.count/max)*100)}%"></div></div>
+      <div class="count">${r.count}</div>
+    </div>
+  `).join('');
+}
+
+async function loadOverview(){
+  const days = document.getElementById('range-select').value;
+  let stats;
+  try{ stats = await api('/api/admin/stats?days='+days); }catch(e){ return; }
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="n">${stats.totalPageviews}</div><div class="l">Pageviews</div></div>
+    <div class="stat-card"><div class="n">${stats.uniqueSessions}</div><div class="l">Unique Sessions</div></div>
+    <div class="stat-card"><div class="n">${stats.totalContacts}</div><div class="l">Total Enquiries</div></div>
+    <div class="stat-card"><div class="n">${stats.unreadContacts}</div><div class="l">Unread Enquiries</div></div>
+  `;
+
+  const maxDay = Math.max(1, ...stats.visitsPerDay.map(([,c])=>c));
+  document.getElementById('visits-chart').innerHTML = stats.visitsPerDay.length
+    ? bar(stats.visitsPerDay.map(([day,count])=>({key:day,count})), maxDay)
+    : '<div class="empty">No visits recorded yet — once the tracking snippet is live on your site, they will show up here.</div>';
+
+  const maxPage = Math.max(1, ...stats.topPages.map(r=>r.count));
+  document.getElementById('top-pages').innerHTML = bar(stats.topPages, maxPage);
+
+  const maxRef = Math.max(1, ...stats.topReferrers.map(r=>r.count));
+  document.getElementById('top-referrers').innerHTML = bar(stats.topReferrers, maxRef);
+
+  if(stats.topCampaignSources.length){
+    document.getElementById('campaign-card').style.display = 'block';
+    const maxC = Math.max(1, ...stats.topCampaignSources.map(r=>r.count));
+    document.getElementById('top-campaigns').innerHTML = bar(stats.topCampaignSources, maxC);
+  }
+
+  document.getElementById('unread-pill').textContent = stats.unreadContacts > 0 ? `(${stats.unreadContacts})` : '';
+}
+
+async function loadOrders(){
+  let data;
+  try{ data = await api('/api/admin/orders'); }catch(e){ return; }
+
+  document.getElementById('orders-stat-grid').innerHTML = `
+    <div class="stat-card"><div class="n">${data.count}</div><div class="l">Total Orders</div></div>
+    <div class="stat-card"><div class="n">£${data.totalRevenue.toFixed(2)}</div><div class="l">Total Revenue</div></div>
+  `;
+
+  const body = document.getElementById('orders-body');
+  const empty = document.getElementById('orders-empty');
+  if(data.orders.length===0){ body.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  body.innerHTML = data.orders.map(o=>`
+    <tr>
+      <td>${new Date(o.createdAt).toLocaleString('en-GB')}</td>
+      <td>${escapeHtml(o.email||'—')}</td>
+      <td class="msg-preview">${o.items.map(i=>`${i.qty}× ${escapeHtml(i.name)}`).join('<br>')}</td>
+      <td><b>£${o.amount.toFixed(2)}</b></td>
+      <td style="font-family:'Roboto Mono',monospace;font-size:11px;">${escapeHtml(o.sessionId.slice(-14))}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadContacts(){
+  let data;
+  try{ data = await api('/api/admin/contacts'); }catch(e){ return; }
+  const body = document.getElementById('contacts-body');
+  const empty = document.getElementById('contacts-empty');
+  if(data.contacts.length===0){ body.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  body.innerHTML = data.contacts.map(c=>{
+    const emailBadge = c.emailResult?.sent
+      ? '<span class="badge sent">Emailed</span>'
+      : '<span class="badge notsent">Not sent</span>';
+    return `
+      <tr class="${c.read?'':'unread'}" data-id="${c.id}">
+        <td>${new Date(c.createdAt).toLocaleString('en-GB')}</td>
+        <td>${escapeHtml(c.name)}</td>
+        <td>${escapeHtml(c.email)}${c.phone?'<br>'+escapeHtml(c.phone):''}</td>
+        <td>${escapeHtml(c.subject||'—')}</td>
+        <td class="msg-preview">${escapeHtml(c.message)}</td>
+        <td>${emailBadge}</td>
+        <td class="row-actions">
+          <button class="mark-btn">${c.read?'Mark Unread':'Mark Read'}</button>
+          <button class="del-btn">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  body.querySelectorAll('.mark-btn').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const tr = e.target.closest('tr');
+      const id = tr.dataset.id;
+      const nowRead = tr.classList.contains('unread');
+      await api(`/api/admin/contacts/${id}/read`, {method:'POST', body: JSON.stringify({read: nowRead})});
+      loadContacts();
+      loadOverview();
+    });
+  });
+  body.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      if(!confirm('Delete this submission permanently?')) return;
+      const tr = e.target.closest('tr');
+      await api(`/api/admin/contacts/${tr.dataset.id}`, {method:'DELETE'});
+      loadContacts();
+    });
+  });
+}
+
+async function loadSettings(){
+  let data;
+  try{ data = await api('/api/admin/settings/emails'); }catch(e){ return; }
+  renderEmailList(data.emails);
+}
+
+function renderEmailList(emails){
+  const list = document.getElementById('email-list');
+  if(emails.length===0){ list.innerHTML = '<div class="empty">No forwarding addresses added yet.</div>'; return; }
+  list.innerHTML = emails.map(e=>`
+    <li><span>${escapeHtml(e)}</span><button class="remove-email" data-email="${escapeHtml(e)}">Remove</button></li>
+  `).join('');
+  list.querySelectorAll('.remove-email').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const current = emails.filter(e=>e!==btn.dataset.email);
+      const res = await api('/api/admin/settings/emails', {method:'POST', body: JSON.stringify({emails: current})});
+      renderEmailList(res.emails);
+    });
+  });
+}
+
+document.getElementById('add-email-btn').addEventListener('click', async ()=>{
+  const input = document.getElementById('new-email');
+  const val = input.value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+  const current = await api('/api/admin/settings/emails');
+  const next = [...new Set([...current.emails, val])];
+  const res = await api('/api/admin/settings/emails', {method:'POST', body: JSON.stringify({emails: next})});
+  input.value = '';
+  renderEmailList(res.emails);
+});
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// Check if already logged in (valid cookie from a previous visit)
+fetch(API + '/api/admin/me', {credentials:'include'})
+  .then(res => res.ok ? showApp() : showLogin())
+  .catch(() => showLogin());
+</script>
+</body>
+</html>
