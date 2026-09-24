@@ -1,0 +1,24 @@
+name = "yorkwork-backend"
+main = "src/index.js"
+compatibility_date = "2026-09-24"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yorkwork-db"
+database_id = "0bebd128-cca9-47c2-9661-c52755269d84"
+
+[vars]
+FRONTEND_URL = "https://yorkwork.netlify.app"
+ALLOWED_ORIGIN = "https://yorkwork.netlify.app"
+
+# Secrets (set with `npx wrangler secret put NAME`, never commit real values):
+#   ADMIN_PASSWORD
+#   SESSION_SECRET
+#   STRIPE_SECRET_KEY
+#   RESEND_API_KEY
+#   FORWARD_EMAIL   (recipient for contact form notifications)
