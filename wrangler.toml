@@ -15,6 +15,7 @@ database_id = "0bebd128-cca9-47c2-9661-c52755269d84"
 [vars]
 FRONTEND_URL = "https://yorkwork.co.uk"
 ALLOWED_ORIGIN = "https://yorkwork.co.uk,https://www.yorkwork.co.uk,https://yorkwork-site.pages.dev,https://yorkwork.netlify.app"
+SMTP_FROM = "Yorkwork <contact@yorkwork.co.uk>"
 
 # Secrets (set with `npx wrangler secret put NAME`, never commit real values):
 #   ADMIN_PASSWORD
