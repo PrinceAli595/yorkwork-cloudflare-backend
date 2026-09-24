@@ -183,10 +183,22 @@ const PRODUCT_CATALOG = [
   {id:403,title:'Water Proof Flag Markers / Survey Flags — 100 pack',price:22.89},
   {id:404,title:'Water Proof Flag Markers / Survey Flags — 200 pack',price:43.89},
   {id:405,title:'Water Proof Flag Markers / Survey Flags — 300 pack',price:66.89},
-  {id:801,title:'Retro Survey Targets — 20 pack',price:7.89},
-  {id:802,title:'Retro Survey Targets — 50 pack',price:13.89},
-  {id:803,title:'Retro Survey Targets — 100 pack',price:16.89},
-  {id:804,title:'Retro Survey Targets — 200 pack',price:31.89},
+  {id:801,title:'Retro Survey Targets — 20×20mm, 20 pack',price:7.89},
+  {id:802,title:'Retro Survey Targets — 20×20mm, 50 pack',price:13.89},
+  {id:803,title:'Retro Survey Targets — 20×20mm, 100 pack',price:16.89},
+  {id:804,title:'Retro Survey Targets — 20×20mm, 200 pack',price:31.89},
+  {id:805,title:'Retro Survey Targets — 20×20mm, 30 pack',price:11.79},
+  {id:806,title:'Retro Survey Targets — 30×30mm, 20 pack',price:8.89},
+  {id:807,title:'Retro Survey Targets — 30×30mm, 30 pack',price:12.89},
+  {id:808,title:'Retro Survey Targets — 30×30mm, 50 pack',price:17.89},
+  {id:809,title:'Retro Survey Targets — 30×30mm, 100 pack',price:29.89},
+  {id:810,title:'Retro Survey Targets — 50×50mm, 20 pack',price:13.89},
+  {id:811,title:'Retro Survey Targets — 50×50mm, 30 pack',price:18.89},
+  {id:812,title:'Retro Survey Targets — 50×50mm, 50 pack',price:32.89},
+  {id:813,title:'Retro Survey Targets — 100×100mm Yellow, 10 pack',price:32.89},
+  {id:814,title:'Retro Survey Targets — 100×100mm Yellow, 20 pack',price:63.89},
+  {id:815,title:'Retro Survey Targets — 100×100mm Yellow Magnetic, 10 pack',price:36.89},
+  {id:816,title:'Retro Survey Targets — 100×100mm Yellow Magnetic, 20 pack',price:71.89},
   {id:901,title:'Plastic Barrier Mesh — Orange mesh netting only',price:21.89},
   {id:902,title:'Plastic Barrier Mesh — Orange mesh + 10 pins',price:39.39},
   {id:903,title:'Plastic Barrier Mesh — 5 Metal Pins',price:12.89},
@@ -219,7 +231,7 @@ app.post('/api/create-checkout-session', rateLimitMiddleware(60 * 1000, 15), asy
   const stripe = new Stripe(stripeKey, { httpClient: Stripe.createFetchHttpClient() });
 
   const body = await c.req.json().catch(() => ({}));
-  const { items, email } = body;
+  const { items, email, delivery } = body;
   if (!Array.isArray(items) || items.length === 0) {
     return c.json({ ok: false, error: 'Basket is empty.' }, 400);
   }
@@ -229,10 +241,12 @@ app.post('/api/create-checkout-session', rateLimitMiddleware(60 * 1000, 15), asy
     const product = findProduct(item.id);
     const qty = Math.max(1, Math.min(999, Number(item.qty) || 1));
     if (!product) continue;
+    // Non-price choices (colour, type...) — descriptive only; the price always comes from the catalog above
+    const opts = typeof item.options === 'string' ? item.options.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 150) : '';
     lineItems.push({
       price_data: {
         currency: 'gbp',
-        product_data: { name: product.title },
+        product_data: { name: (product.title + (opts ? ` — ${opts}` : '')).slice(0, 250) },
         unit_amount: Math.round(product.price * 100),
       },
       quantity: qty,
@@ -240,12 +254,33 @@ app.post('/api/create-checkout-session', rateLimitMiddleware(60 * 1000, 15), asy
   }
   if (lineItems.length === 0) return c.json({ ok: false, error: 'No valid items in basket.' }, 400);
 
+  // Delivery details from the checkout form, attached to the payment so each order shows where to send it
+  const clean = (v, n = 200) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n) : '');
+  const dl = delivery && typeof delivery === 'object' ? delivery : {};
+  const ship = {
+    name: clean(dl.name, 100), phone: clean(dl.phone, 40),
+    line1: clean(dl.address1), line2: clean(dl.address2), city: clean(dl.city, 100), postcode: clean(dl.postcode, 20).toUpperCase(),
+  };
+  const hasAddress = ship.name && ship.line1 && ship.city && ship.postcode;
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: lineItems,
       customer_email: email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : undefined,
+      ...(hasAddress ? {
+        payment_intent_data: {
+          shipping: {
+            name: ship.name, phone: ship.phone || undefined,
+            address: { line1: ship.line1, line2: ship.line2 || undefined, city: ship.city, postal_code: ship.postcode, country: 'GB' },
+          },
+        },
+        metadata: {
+          delivery_name: ship.name, delivery_phone: ship.phone,
+          delivery_address: [ship.line1, ship.line2, ship.city, ship.postcode].filter(Boolean).join(', ').slice(0, 490),
+        },
+      } : {}),
       success_url: `${c.env.FRONTEND_URL}/#/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${c.env.FRONTEND_URL}/#/checkout`,
     });
@@ -362,6 +397,18 @@ const DRIVE_IMAGE_IDS = {
   802: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
   803: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
   804: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  805: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  806: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  807: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  808: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  809: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  810: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  811: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  812: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  813: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  814: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  815: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
+  816: '1Xysyo5pItygsvMrx0KlDBpS1T2qxfWMw',
   2301: '1XdUOgoBysuSQHIuASNR2PQwFJifsBhRk',
   2302: '1XdUOgoBysuSQHIuASNR2PQwFJifsBhRk',
   2303: '1XdUOgoBysuSQHIuASNR2PQwFJifsBhRk',
