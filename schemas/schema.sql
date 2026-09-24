@@ -35,7 +35,8 @@ CREATE TABLE orders (
   email TEXT,
   amount REAL NOT NULL,
   items_json TEXT NOT NULL,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  delivery TEXT DEFAULT ''
 );
 
 CREATE TABLE settings (
