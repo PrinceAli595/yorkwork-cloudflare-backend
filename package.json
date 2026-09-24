@@ -1,0 +1,20 @@
+{
+  "name": "yorkwork-backend",
+  "version": "1.0.0",
+  "description": "Contact form, email forwarding, visitor analytics, and Stripe checkout backend for Yorkwork — running on Cloudflare Workers.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 execute yorkwork-db --local --file=./schemas/schema.sql",
+    "db:migrate:remote": "wrangler d1 execute yorkwork-db --remote --file=./schemas/schema.sql"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "stripe": "^16.8.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
