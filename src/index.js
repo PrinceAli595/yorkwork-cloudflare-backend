@@ -437,6 +437,11 @@ const DRIVE_IMAGE_IDS = {
   4002: '1omv7aGhOUwvpXrT2-f9QlOt3COKJ60Ao', // Flag colour: Blue
   4003: '1p2Tpm4SHqBc8AfiCyCmQ2f6kSJwZfHsB', // Flag colour: Pink
   4004: '1fZmpu_hDSFZoImaRJZNva4FUbJnFxG-A', // Flag colour: Orange
+  4005: '1IPSza7MuTLoT_gMXAXN8aGO2p9EW_fLs', // Flag colour: Fluorescent Yellow
+  4006: '1X4M6G5EeK0XJke-Ob34EZe2u_jX5DQDr', // Flag colour: Fluorescent Red
+  4007: '1KwHk-pF3cbHi9Tdyo2sXKwFTjMC2b-ac', // Flag colour: Green
+  4008: '1CBu3pOwEqFxLAy4TaYEuu9aTfCnfqVlc', // Flag colour: Purple
+  4009: '1uZHowftiANimmgQarKYNMcxnlwfY6Gnt', // Flag colour: White
   8005: '1W-j1b6kR4TYUr9PljMSbyNj1DlrPBeB5', // Target type: Silver
   8004: '16sF-P3ZvfkEYck6YV10MzM9dGkOncrKh', // Target type: Red
   8003: '1CGT80Xitj-UQzUD5kDcP6Jy7kXEINmTj', // Target type: Orange w/ Triangles
