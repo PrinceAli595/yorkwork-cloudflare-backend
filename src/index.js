@@ -32,8 +32,8 @@ const app = new Hono();
 /* ------------------------------------------------------------------ */
 
 app.use('*', async (c, next) => {
-  const allowed = c.env.ALLOWED_ORIGIN || '*';
-  return cors({ origin: allowed, credentials: true })(c, next);
+  const allowed = (c.env.ALLOWED_ORIGIN || '*').split(',').map((s) => s.trim());
+  return cors({ origin: allowed.length === 1 ? allowed[0] : allowed, credentials: true })(c, next);
 });
 
 /* ------------------------------------------------------------------ */
