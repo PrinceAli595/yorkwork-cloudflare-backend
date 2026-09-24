@@ -307,11 +307,13 @@ app.get('/api/checkout-session/:id', rateLimitMiddleware(60 * 1000, 30), async (
         const itemsJson = JSON.stringify((session.line_items?.data || []).map((li) => ({
           name: li.description, qty: li.quantity, amount: (li.amount_total || 0) / 100,
         })));
+        const md = session.metadata || {};
+        const delivery = [md.delivery_name, md.delivery_phone, md.delivery_address].filter(Boolean).join(' · ');
         await c.env.DB.prepare(
-          'INSERT INTO orders (session_id, email, amount, items_json, created_at) VALUES (?, ?, ?, ?, ?)'
+          'INSERT INTO orders (session_id, email, amount, items_json, created_at, delivery) VALUES (?, ?, ?, ?, ?, ?)'
         ).bind(
           session.id, session.customer_details?.email || '', (session.amount_total || 0) / 100,
-          itemsJson, new Date().toISOString()
+          itemsJson, new Date().toISOString(), delivery
         ).run();
       }
     }
@@ -650,7 +652,7 @@ app.get('/api/admin/orders', requireAdmin, async (c) => {
   const rows = await c.env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
   const orders = (rows.results || []).map((r) => ({
     sessionId: r.session_id, email: r.email, amount: r.amount,
-    items: JSON.parse(r.items_json), createdAt: r.created_at,
+    items: JSON.parse(r.items_json), createdAt: r.created_at, delivery: r.delivery || '',
   }));
   const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
   return c.json({ ok: true, orders, totalRevenue, count: orders.length });
